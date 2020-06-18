@@ -262,7 +262,7 @@
 					else
 						$this->unsetOTPSessionVariables();
 					}
-			}
+			
 			return $result;
 		}
 
