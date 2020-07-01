@@ -29,6 +29,7 @@
 			}
 			
 			$this->routeData();
+				
 		}
 		
 		public static function isFormEnabled()
@@ -64,6 +65,7 @@
 		
 		public static function Websms_display_registerOTP_btn() 
 		{
+			wp_header();
 			$otp_resend_timer = websmslk_get_option( 'otp_resend_timer', 'Websms_general', '15');
 			echo '<button type="submit" class="woocommerce-Button button" name="register" value="Register" id="Websms_register_with_otp">Register</button>';
 			 
@@ -104,6 +106,7 @@
 								
 			 
 			 </script>';
+			 wp_footer();
 			
 		}
 		
@@ -298,11 +301,11 @@
 		}
 
 		function processFormFields($username,$email,$errors,$password)
-		{
+		{ 
 			global $phoneLogic;
-						
+					
 			if ( !isset( $_POST['billing_phone'] ) || !WebsmsUtility::validatePhoneNumber($_POST['billing_phone']))
-				return new WP_Error( 'billing_phone_error', str_replace("##phone##",WebsmscURLOTP::checkPhoneNos($_POST['billing_phone']),$phoneLogic->_get_otp_invalid_format_message()) );
+				return new WP_Error( 'billing_phone_error', str_replace("##phone##",WebsmscURLOTP::checkPhoneNos($_POST['billing_phone']),$phoneLogic->newsletterslk__get_otp_invalid_format_message()) );
 			Websms_site_challenge_otp($username,$email,$errors,$_POST['billing_phone'],"phone",$password);
 		}
 		
@@ -317,23 +320,27 @@
 		}
 
 		function handle_failed_verification($user_login,$user_email,$phone_number)
-		{
+		{ 
 			WebsmsUtility::checkSession();
 			if(!isset($_SESSION[$this->formSessionVar]) && !isset($_SESSION[$this->formSessionVar2])) return;
 			if(isset($_SESSION[$this->formSessionVar]))
 				Websms_site_otp_validation_form($user_login,$user_email,$phone_number,WebsmsUtility::_get_invalid_otp_method(),"phone",FALSE);
 			if(isset($_SESSION[$this->formSessionVar2]))
+			   
 				wp_send_json( WebsmsUtility::_create_json_response(WebsmsMessages::INVALID_OTP,'error'));
 			
 		}
 
 		function handle_post_verification($redirect_to,$user_login,$user_email,$password,$phone_number,$extra_data)
-		{
+		{  
 			WebsmsUtility::checkSession();
+			
 			if(!isset($_SESSION[$this->formSessionVar]) && !isset($_SESSION[$this->formSessionVar2])) return;
+			//print_r(	$_SESSION['sa_mobile_verified']);exit;
 			$_SESSION['sa_mobile_verified'] = true;
-			if(isset($_SESSION[$this->formSessionVar2]))
-				wp_send_json( WebsmsUtility::_create_json_response("OTP Validated Successfully",'success'));
+			//print_r($this->redirectToPage);exit;
+			//if(isset($_SESSION[$this->formSessionVar2]))
+			//	wp_send_json( WebsmsUtility::_create_json_response("OTP Validated Successfully",'success'));
 		}
 		
 		public function unsetOTPSessionVariables()
@@ -350,13 +357,13 @@
 		}
 
 		function handleFormOptions()
-		{
+		{ 
 			update_option('mo_customer_validation_wc_default_enable',
-				isset( $_POST['mo_customer_validation_wc_default_enable']) ? $_POST['mo_customer_validation_wc_default_enable'] : 0);
+				isset( $_POST['mo_customer_validation_wc_default_enable']) ? sanitize_text_field($_POST['mo_customer_validation_wc_default_enable']) : 0);
 			update_option('mo_customer_validation_wc_enable_type',
-				isset( $_POST['mo_customer_validation_wc_enable_type']) ? $_POST['mo_customer_validation_wc_enable_type'] : '');
+				isset( $_POST['mo_customer_validation_wc_enable_type']) ? sanitize_text_field($_POST['mo_customer_validation_wc_enable_type']) : '');
 			update_option('mo_customer_validation_wc_redirect',
-				isset( $_POST['page_id']) ? get_the_title($_POST['page_id']) : 'My Account');
+				isset( $_POST['page_id']) ? get_the_title(sanitize_text_field($_POST['page_id'])) : 'My Account');
 		}
 	}
 	new WooCommerceRegistrationForm;

@@ -4,7 +4,7 @@
  * Plugin Name: Newsletters.lk
  * Plugin URI: https://newsletters.lk
  * Description: SMS Solucation For Sri Lanka
- * Version: 1.4
+ * Version: 1.5
  * Author: SmarteWorks PVT 
  * Author URI: https://www.smarteworks.com
  * Text Domain: Newsletters.lk
@@ -16,19 +16,18 @@
 
 if ( !defined( 'ABSPATH' ) ) exit;
 
-define( 'PLUGIN_LIB_PATH', dirname(__FILE__). '/lib' );
-define( 'WEBSMS_PLUGIN_VERSION', plugin_get_version());
+require_once dirname(__FILE__). '/lib/class.settings-api.php';
+require_once dirname(__FILE__). '/lib/newsletterslk.class.php';
 
-require_once PLUGIN_LIB_PATH. '/class.settings-api.php';
-require_once PLUGIN_LIB_PATH. '/newsletterslk.class.php';
-
-function plugin_get_version() {
-	if ( ! function_exists( 'get_plugins' ) )
-		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-	$plugin_folder = get_plugins( '/' . plugin_basename( dirname( __FILE__ ) ) );
-	$plugin_file = basename( ( __FILE__ ) );
-	return $plugin_folder[$plugin_file]['Version'];
-
+if(! function_exists('plugin_get_version')){
+	function plugin_get_version() {
+		if ( ! function_exists( 'get_plugins' ) )
+			require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		$plugin_folder = get_plugins( '/' . plugin_basename( dirname( __FILE__ ) ) );
+		$plugin_file = basename( ( __FILE__ ) );
+		return $plugin_folder[$plugin_file]['Version'];
+	
+	}
 }
 
 function websmslk_sanitize_array($arr) 
@@ -93,24 +92,7 @@ class WebSMS_WC_Order_SMS {
 		
         add_action( 'woocommerce_checkout_update_order_meta', array( $this, 'buyer_notification_update_order_meta' ) );
         add_action( 'woocommerce_order_status_changed', array( $this, 'trigger_after_order_place' ), 10, 3 );
-		if(class_exists('WooCommerce_Warranty')) {		
-			add_action( 'admin_post_wc_warranty_settings_update', array($this, 'update_wc_warranty_settings'),5 );
-			add_action( 'wp_ajax_warranty_update_request_fragment', array($this, 'on_rma_status_update'),0 );
-			add_action( 'wc_warranty_created',  array($this, 'on_new_rma_request'),5);
-		}
 		
-		// if(class_exists('WPCF7')) {	
-		// 	if(websmslk_get_option('allow_query_sms', 'Websms_general')!="off") {
-		// 		add_filter( 'wpcf7_editor_panels' , array($this, 'new_menu_websms_lk'),98);
-		// 		add_action( 'wpcf7_after_save', array( &$this, 'save_form' ) );
-		// 	}
-		// }
-		
-		if ( is_plugin_active( 'gravityforms-master/gravityforms.php' ) || is_plugin_active('gravityforms/gravityforms.php' )) 
-		{
-			require_once 'mod/forms/gravity-form.php';
-			add_action( 'gform_after_submission', array( $this, 'do_gForm_processing' ), 10, 2 );
-		}
 		
 
 		require_once 'includes/formlist.php';
@@ -274,7 +256,6 @@ class WebSMS_WC_Order_SMS {
 
         if( isset( $plugin_data['slug'] ) && ( $plugin_data['slug'] == 'newsletters.lk' ) && ! defined( 'Websms_DIR' ) ) {
 			$plugin_meta[] = '<a href="http://newsletters.lk/knowledgebase/wordpress.html" target="_blank">Documentation</a>';
-			$plugin_meta[] = '<a href="https://wordpress.org/support/plugin/newsletters.lk/reviews/#postform" target="_blank" class="wc-rating-link">★★★★★</a>';
         }
         return $plugin_meta;
     }
@@ -303,8 +284,7 @@ class WebSMS_WC_Order_SMS {
 		$apitoken = websmslk_get_option( 'websmslk_API_key', 'Websms_gateway' );
 		$apikey = websmslk_get_option( 'Websms_API_Token', 'Websms_gateway' );
 		$senderid=websmslk_get_option("Websms_Sender_ID","Websms_gateway","");
-		$result = WebsmscURLOTP::get_templates($apitoken, $apikey);
-		$templates = json_decode($result, true);
+		$templates = [];
 		?>
 		<select name="Websms_templates" id="Websms_templates" style="width:87%;" onchange="return selecttemplate(this, '#wc_websms_lk_sms_order_message');">
 		<option value="">Select Template</option>
@@ -353,51 +333,10 @@ class WebSMS_WC_Order_SMS {
 		$user_authorize = new Websms_Setting_Options();
 		$islogged = true;
 		$auto_sync = websmslk_get_option( 'auto_sync', 'Websms_general', 'off');
-		if($islogged == true) 
-		{
-			if($auto_sync == 'on')
-			{
-				self::sync_customers();
-			}
-		}
+		
 		if($low_bal_alert == 'on'){self::send_Websms_balance();}
 		if($daily_bal_alert == 'on'){self::daily_email_alert();}
 		
-	}
-	static function sync_customers()
-	{
-		$group_name 	= websmslk_get_option( 'group_auto_sync', 'Websms_general', '');
-		$update_id 		= websmslk_get_option( 'last_sync_userId','Websms_sync','');
-		$update_id 		= ($update_id!='') ? $update_id : 3;
-		
-		global $wpdb;
-		
-		$sql 			= $wpdb->prepare(
-		"SELECT ID FROM {$wpdb->users} WHERE {$wpdb->users}.ID > %d order by ID asc limit 10 ",
-		$update_id
-		);
-		
-		$uids = $wpdb->get_col( $sql );
-		if(sizeof($uids)==0)
-		{
-			echo 'No New users found.';
-		}
-		else
-		{
-			$user_query = new WP_User_Query( array( 'include' => $uids  ,'orderby' => 'id', 'order' => 'ASC') );
-			if ( $user_query->get_results()) {
-				 foreach ( $user_query->get_results() as $user ) {
-					 $number = get_user_meta($user->ID, 'billing_phone', true);
-					 WebsmscURLOTP::create_contact($group_name, $user->display_name, $number);
-					$last_sync_id = $user->ID;
-				}
-				
-				update_option('Websms_sync',array('last_sync_userId'=>$last_sync_id));
-				
-			 } else {
-				 echo 'No users found.';
-			 }
-		}
 	}
 	
 	static function send_Websms_balance()
@@ -457,7 +396,7 @@ class WebSMS_WC_Order_SMS {
      * @return void
      */
     function buyer_notification_update_order_meta( $order_id ) {
-        if ( ! empty( $_POST['buyer_sms_notify'] ) ) {
+        if ( ! empty( $_POST['buyer_sms_notify'] ) ) { // $_POST use only for data validate
             update_post_meta( $order_id, '_buyer_sms_notify', sanitize_text_field( $_POST['buyer_sms_notify'] ) );
         }
     }
@@ -536,82 +475,7 @@ class WebSMS_WC_Order_SMS {
 			}
 		}
     }
-	
-	function update_wc_warranty_settings($data)
-	{
-		$options = $_POST;
-		if($options['tab'] == 'Websms_warranty')
-		{
-			foreach($options as $name => $value)
-			{
-			   if(is_array($value))
-			   {
-				   foreach($value as $k => $v)
-				   {
-					   if(!is_array($v))
-					   {
-							$value[$k] = stripcslashes($v);
-					   }
-				   }
-			   }
-				update_option( $name, $value );
-		    }
-		}
-	}
-	
-	function send_rma_status_sms($request_id,$status)
-	{
-		$wc_warranty_checkbox=websmslk_get_option('warranty_status_'.$status, 'Websms_warranty','');
-		$is_sms_enabled = ($wc_warranty_checkbox=='on')  ? true : false;
-		if($is_sms_enabled)
-		{
-			$sms_content	= websmslk_get_option('sms_text_'.$status, 'Websms_warranty','');
-			$order_id 		= get_post_meta( $request_id, '_order_id', true );
-			$rma_id 		= get_post_meta( $request_id, '_code', true );
-			$order 			= wc_get_order( $order_id );
-			global $wpdb;
-			$products 		= $items = $wpdb->get_results( $wpdb->prepare(
-							"SELECT *
-							FROM {$wpdb->prefix}wc_warranty_products
-							WHERE request_id = %d",
-							$request_id
-						), ARRAY_A );
-						
-			$item_name = '';						
-			foreach ( $products as $product ) {
 
-				if ( empty( $product['product_id'] ) && empty( $item['product_name'] ) ) {
-					continue;
-				}
-
-				if ( $product['product_id'] == 0 ) {
-					$item_name .= $item['product_name'].', ';
-				} else {
-					$item_name .= warranty_get_product_title( $product['product_id'] ).', ';
-				}
-			}
-			$item_name 					= rtrim($item_name, ', ');
-			$sms_content 				= str_replace( '[item_name]', $item_name, $sms_content );
-			$buyer_sms_data				= array();
-			$buyer_sms_data['number']   = get_post_meta( $order_id, '_billing_phone', true );
-			$buyer_sms_data['sms_body'] = $this->pharse_sms_body($sms_content, $status, $order, '', $rma_id);
-			$buyer_response 			= WebsmscURLOTP::sendsms( $buyer_sms_data );
-		}
-	}
-	
-	function on_new_rma_request($warranty_id)
-	{
-		$this->send_rma_status_sms($warranty_id,"new");
-	}
-	
-	function on_rma_status_update()
-	{
-		$request_id = $_POST['request_id'];
-		$status 	= $_POST['status'];
-		
-		$this->send_rma_status_sms($request_id,$status);
-	}
-	
 	function trigger_new_customer_note( $data ) {
 		
 		if(websmslk_get_option('buyer_notification_notes', 'Websms_general')=="on")
@@ -762,7 +626,7 @@ class WebSMS_WC_Order_SMS {
 	}
 	
   public function save_form( $form ) {
-    update_option( 'Websms_sms_c7_' . (method_exists($form, 'id') ? $form->id() : $form->id), $_POST['wpcf7Websms-settings'] );
+    update_option( 'Websms_sms_c7_' . (method_exists($form, 'id') ? $form->id() : $form->id), sanitize_text_field($_POST['wpcf7Websms-settings']) );
   } 
   
   public function get_cf7_tagS_To_String($value,$form){
@@ -778,10 +642,10 @@ class WebSMS_WC_Order_SMS {
 	
 	public	function send_custom_sms($data) 
 	{
-		$order 							= new WC_Order($_POST['order_id']);
-		$sms_body 						= $_POST['sms_body'];
+		$order 							= new WC_Order( sanitize_text_field($_POST['order_id']));
+		$sms_body 						= sanitize_text_field($_POST['sms_body']);
 		$buyer_sms_data 				= array();
-		$buyer_sms_data['number']   	= get_post_meta( $_POST['order_id'], '_billing_phone', true );
+		$buyer_sms_data['number']   	= get_post_meta( sanitize_text_field($_POST['order_id']), '_billing_phone', true );
 		$buyer_sms_data['sms_body'] 	= $this->pharse_sms_body($sms_body, $order->get_status(), $order, '');
 		$buyer_response 				= WebsmscURLOTP::sendsms( $buyer_sms_data );
 		echo $buyer_response;

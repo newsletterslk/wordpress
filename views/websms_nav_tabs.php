@@ -61,18 +61,7 @@
 				  </li>
 			 <?php	
 			  }
-			  if (is_plugin_active('learnpress/learnpress.php' )) //learnpress
-			 {
-			 ?>
-			 <li tab_type="lpresscsttemplates" onclick="Websms_change_nav(this, 'Websms_nav_lpresscsttemplates_box')" >
-			<a href="#lpresscsttemplates"><span class="dashicons-before dashicons-admin-users"></span> <?php echo _e( 'LPress Cust. Temp', WebsmsConstants::TEXT_DOMAIN );?></a>
-			 </li>
 			 
-			 <li tab_type="lpressadmintemplates" onclick="Websms_change_nav(this, 'Websms_nav_lpressadmintemplates_box')" >
-			<a href="#lpressadmintemplates"><span class="dashicons-before dashicons-list-view"></span> <?php echo _e( 'LPress Admin Temp', WebsmsConstants::TEXT_DOMAIN );?></a>
-			 </li>
-			<?php
-			 }
 			?> 
 			   <li tab_type="callbacks" onclick="Websms_change_nav(this, 'Websms_nav_callbacks_box')" >
 				<a href="#otp"><span class="dashicons-before dashicons-admin-settings"></span> <?php echo _e( 'Advanced Settings', WebsmsConstants::TEXT_DOMAIN );?></a>

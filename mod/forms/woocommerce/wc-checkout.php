@@ -265,7 +265,7 @@
 		{
 			WebsmsUtility::checkSession();
 			if(!isset($_SESSION[$this->formSessionVar])) return;
-			wc_add_notice( WebsmsUtility::_get_invalid_otp_method(), 'error' );
+			wc_add_notice( WebsmsUtility::newsletterlk_get_invalid_otp_method(), 'error' );
 		}
 
 		function handle_post_verification($redirect_to,$user_login,$user_email,$password,$phone_number,$extra_data)
@@ -277,7 +277,7 @@
 
 		function enqueue_script_on_page()
 		{
-			wp_register_script( 'wccheckout', MOV_URL . 'js/wccheckout.min.js' , array('jquery') ,'1.1',true);
+			wp_register_script( 'wccheckout', plugin_dir_url(dirname(__FILE__)) . 'js/wccheckout.min.js' , array('jquery') ,'1.1',true);
 			wp_localize_script( 'wccheckout', 'otp_for_selected_gateways', array(
 				'paymentMethods' => $this->paymentMethods,
 				'ask_otp' => ($this->guestCheckOutOnly && is_user_logged_in() ? false : true),
@@ -310,15 +310,15 @@
 		function handleFormOptions()
 		{
 			update_option('mo_customer_validation_wc_checkout_enable',
-				isset( $_POST['mo_customer_validation_wc_checkout_enable']) ? $_POST['mo_customer_validation_wc_checkout_enable'] : 0);
+				isset( $_POST['mo_customer_validation_wc_checkout_enable']) ? sanitize_text_field($_POST['mo_customer_validation_wc_checkout_enable']) : 0);
 			update_option('mo_customer_validation_wc_checkout_type',
-				isset(  $_POST['mo_customer_validation_wc_checkout_type']) ? $_POST['mo_customer_validation_wc_checkout_type'] : '');
+				isset(  $_POST['mo_customer_validation_wc_checkout_type']) ? sanitize_text_field($_POST['mo_customer_validation_wc_checkout_type']) : '');
 			update_option('mo_customer_validation_wc_checkout_guest',
-				isset(  $_POST['mo_customer_validation_wc_checkout_guest']) ? $_POST['mo_customer_validation_wc_checkout_guest'] : '');
+				isset(  $_POST['mo_customer_validation_wc_checkout_guest']) ? sanitize_text_field($_POST['mo_customer_validation_wc_checkout_guest']) : '');
 			update_option('mo_customer_validation_wc_checkout_button',
-				isset(  $_POST['mo_customer_validation_wc_checkout_button']) ? $_POST['mo_customer_validation_wc_checkout_button'] : '');
+				isset(  $_POST['mo_customer_validation_wc_checkout_button']) ? sanitize_text_field($_POST['mo_customer_validation_wc_checkout_button']) : '');
 			update_option('mo_customer_validation_wc_checkout_popup',
-				isset(  $_POST['mo_customer_validation_wc_checkout_popup']) ? $_POST['mo_customer_validation_wc_checkout_popup'] : '');
+				isset(  $_POST['mo_customer_validation_wc_checkout_popup']) ? sanitize_text_field($_POST['mo_customer_validation_wc_checkout_popup']) : '');
 		}
 	}
 	new WooCommerceCheckOutForm;

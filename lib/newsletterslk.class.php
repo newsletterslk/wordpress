@@ -35,13 +35,8 @@ class Newsletterslk {
     private function Call($params){  
         if($params){ 
             $params = str_replace(" ", '%20', $params);
-            $curl_handle=curl_init();
-            curl_setopt($curl_handle,CURLOPT_URL,$this->url.$params);
-            curl_setopt($curl_handle,CURLOPT_CONNECTTIMEOUT,2);
-            curl_setopt($curl_handle,CURLOPT_RETURNTRANSFER,1);
-            $buffer = curl_exec($curl_handle);
-            curl_close($curl_handle);
-            if($buffer){  print_r($buffer);
+            $buffer=wp_remote_get($params);
+            if($buffer){  
                 return $buffer;
             }else{
                 return false;

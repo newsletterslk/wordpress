@@ -4,7 +4,7 @@ echo'	<html>
 						<meta http-equiv="X-UA-Compatible" content="IE=edge">
 						<meta name="viewport" content="width=device-width, initial-scale=1">
 						<link rel="stylesheet" type="text/css" href="' . $css_url . '" />
-						<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+						'.wp_enqueue_script('jquery').'
 					</head>
 					<body>
 						<div class="mo-modal-backdrop">

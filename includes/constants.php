@@ -32,10 +32,6 @@ class WebsmsConstants
 	{
 		global $phoneLogic;
 		$phoneLogic = new PhoneLogic();
-		define('MOV_DIR', plugin_dir_path(dirname(__FILE__)));
-		define('MOV_URL', plugin_dir_url(dirname(__FILE__)));
-		define('MOV_CSS_URL', MOV_URL . 'css/websms_lk_customer_validation_style.css');
-		define('MOV_LOADER_URL', MOV_URL . 'images/ajax-loader.gif');
 	}
 }
 new WebsmsConstants;

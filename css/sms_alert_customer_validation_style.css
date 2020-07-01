@@ -676,3 +676,16 @@ pre{
     -webkit-transition: background 0.2s;
     transition: background 0.2s;
 }
+.my_panda{
+	max-width:500px;
+	margin:0px auto;
+	height:350px;
+	border:1px solid #ddd;
+	padding:15px;
+	margin-top:60px;
+}
+@media(max-width:580px){
+	.my_panda{
+		margin-top:0px;
+	}
+}

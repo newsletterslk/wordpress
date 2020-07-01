@@ -41,9 +41,7 @@ echo '<div style="background: #fafafa;background-color:#f5f5f5;background-positi
                                                                     <br />
                                                                     <br />Remember the more you purchase the more you save <span style="font-size:30px;color:orange;">&#9787;	</span></td>
                                                             </tr>
-                                                            <tr>
-                                                                <td style="padding-top:5px;padding-bottom:10px;font-weight:normal;font-size:16px;line-height:26px;color:#6f8996">If you are happy with our services, please give us a <a href="https://wordpress.org/support/plugin/newsletters.lk/reviews/#postform" style="text-decoration:none;color: #48a9f9;">★★★★★</a>, to help us encourage and develop more features and integrations.</td>
-                                                            </tr>
+                                                            
                                                         </tbody>
                                                     </table>
                                                     <table border="0" cellpadding="0" cellspacing="0" width="100%">

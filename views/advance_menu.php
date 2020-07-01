@@ -40,44 +40,7 @@
 </tr>
 <!--/-enable shorturl-->
 <?php
-if(is_plugin_active('woocommerce/woocommerce.php')){ ?>
-    <tr valign="top">
-        <th scrope="row"></th>
-        <td>
-            <input type="checkbox" name="Websms_general[auto_sync]" id="Websms_general[auto_sync]" class="Websms_box sync_group" <?php echo (($auto_sync=='on')?"checked='checked'":''); ?> onchange="toggleDisabled(this)"/> <?php _e( 'Sync To Group', WebsmsConstants::TEXT_DOMAIN ) ?>
-            <?php 
-                $groups = json_decode(WebsmscURLOTP::group_list(),true);
-            ?>
-            <select name="Websms_general[group_auto_sync]" id="group_auto_sync">
 
-                <?php 
-                if(!is_array($groups['description']) || array_key_exists('desc', $groups['description'])){ ?>
-                        <option value="0">SELECT</option>
-                    <?php
-                }
-                else{
-                    foreach($groups['description'] as $group){ ?>
-                        <option value="<?php echo $group['Group']['name']; ?>" <?php echo (trim($group_auto_sync) == $group['Group']['name']) ? 'selected="selected"' : ''; ?>><?php echo $group['Group']['name']; ?></option>
-                    <?php						
-                    }
-                }
-                ?>
-
-            </select>
-            <?php
-                if((!is_array($groups['description']) || array_key_exists('desc', $groups['description'])) && $islogged==true){
-                    ?>
-                        <a href="javascript:void(0)" onclick="create_group(this);" id="create_group" style="text-decoration: none;">Create Group </a>
-                    <?php		
-                }
-            ?>
-            <span class="tooltip" data-title="Sync users to a Group in Newsletters.lk"><span class="dashicons dashicons-info"></span></span>						  
-        </td>
-    </tr>
-    <?php
-        }
-    ?>
-<?php
 if($hasWoocommerce){?>
 <?php
 /* 

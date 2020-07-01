@@ -5,54 +5,23 @@ class Websms_Setting_Options {
     public static function init() {
 		require_once plugin_dir_path( __DIR__ ).'/includes/countrylist.php';
 		
-		if ( is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ) ) 
-		{
-			require_once plugin_dir_path( __DIR__ ).'/includes/edd.php';
-		}
 		
-		if ( is_plugin_active( 'learnpress/learnpress.php' ) ) 
-		{
-			require_once plugin_dir_path( __DIR__ ).'/includes/learnpress.php';
-		}
 		
-		if(is_plugin_active('woocommerce-bookings/woocommerce-bookings.php'))
-		{
-			require_once plugin_dir_path( __DIR__ ).'/includes/woocommerce-booking.php';
-			self::addActionForBookingStatus();
-		}
+		// if(is_plugin_active('woocommerce-bookings/woocommerce-bookings.php'))
+		// {
+		// 	require_once plugin_dir_path( __DIR__ ).'/includes/woocommerce-booking.php';
+		// 	self::addActionForBookingStatus();
+		// }
 		
-		if (is_plugin_active( 'ultimate-member/ultimate-member.php' )) //>= UM version 2.0.17 
-		{
-			add_filter( 'um_predefined_fields_hook', __CLASS__ . '::my_predefined_fields');	
-		}
 		
 		add_action('admin_menu', __CLASS__ . '::websms_lk_wc_submenu');
 		
 		add_action( 'verify_senderid_button', 				__CLASS__ . '::action_woocommerce_admin_field_verify_websms_lk_user' 	);
 		add_action( 'admin_post_save_websms_lk_settings',  __CLASS__ . '::save'  													);
-		if ( is_plugin_active( 'woocommerce-warranty/woocommerce-warranty.php' ) ) {
-			add_action( 'wc_warranty_settings_tabs', __CLASS__ .'::Websms_warranty_tab'  );
-			add_action( 'wc_warranty_settings_panels', __CLASS__ .'::Websms_warranty_settings_panels'  );
-		}
-					
 		
 		
 		self::Websms_dashboard_setup();
 		
-		if(array_key_exists('option', $_GET) && $_GET['option'])
-		{
-			switch (trim($_GET['option'])) 
-			{
-				case 'Websms-woocommerce-senderlist':
-					echo WebsmscURLOTP::get_senderids($_GET['user'],$_GET['pwd']);exit();	break;
-				case 'Websms-woocommerce-creategroup':
-					WebsmscURLOTP::creategrp();
-					echo WebsmscURLOTP::group_list();
-					break;
-				case 'Websms-woocommerce-logout':
-				echo self::logout();	break;				
-			}
-		}
 	}
 	
 	
@@ -476,10 +445,10 @@ class Websms_Setting_Options {
 		$Websms_api   			       	= websmslk_get_option( 'Websms_api', 'Websms_gateway', '' );
 		$hasWoocommerce 					= is_plugin_active( 'woocommerce/woocommerce.php' );
 		$hasWPmembers 						= is_plugin_active( 'wp-members/wp-members.php' );
-		$hasUltimate 						= (is_plugin_active( 'ultimate-member/ultimate-member.php' ) || is_plugin_active( 'ultimate-member/index.php' )) ? true : false;
-		$hasWoocommerceBookings 			= (is_plugin_active('woocommerce-bookings/woocommerce-bookings.php')) ? true : false;
-		$hasWPAM 							= (is_plugin_active('affiliates-manager/boot-strap.php' )) ? true : false;
-		$hasLearnPress 						= (is_plugin_active('learnpress/learnpress.php' )) ? true : false;
+		$hasUltimate 						= false;
+		$hasWoocommerceBookings 			= false;
+		$hasWPAM 							= false;
+		$hasLearnPress 						= false;
 		$sms_admin_phone 					= websmslk_get_option( 'sms_admin_phone', 'Websms_message', '' );
 		$group_auto_sync 					= websmslk_get_option( 'group_auto_sync', 'Websms_general', '' );		
 		$sms_body_on_hold 					= websmslk_get_option( 'sms_body_on-hold', 'Websms_message', WebsmsMessages::DEFAULT_BUYER_SMS_ON_HOLD );
@@ -559,7 +528,7 @@ class Websms_Setting_Options {
 					<div class="card">
 						<div class="card-body">
 							<div class="text-center">
-								<img src="https://newsletters.lk/assets/images/logo.png" width="200"/>
+								<img src="<?php echo esc_url(plugin_dir_url( __FILE__ ) . '../images/logo.png'); ?>" width="200"/>
 							</div>
 							
 						</div>
@@ -579,7 +548,7 @@ class Websms_Setting_Options {
 								?>
 									<h2 class="text-center">Welcome To Newsletters.lk SMS WordPress Plugin</h2>
 									<div class="text-center">
-										<img width="300" src="https://newsletters.lk/assets/images/customer-experience.png"/>
+										<img width="300" src="<?php echo esc_url(plugin_dir_url( __FILE__ ) . 'images/customer-experience'); ?>"/>
 									</div>
 									<p class="text-center">To start SMS Service you need setup <b>API KEY</b> and <b>API Token in Settings tab</b>. You can find tokens and key from your newsletters.lk dashboard.</p>
 									
@@ -588,7 +557,7 @@ class Websms_Setting_Options {
 							}else{
 								?>
 								<div class="text-center">
-									<img src="https://newsletters.lk/assets/images/sms-market-portal/text-msg.png" width="100"/>
+									<img src="<?php echo esc_url(plugin_dir_url( __FILE__ ) . '../images/text-msg.png'); ?>" width="100"/>
 								</div>
 								<div class="text-center">
 									<h3>Current Balance</h3>
@@ -655,45 +624,7 @@ class Websms_Setting_Options {
 								</tr>
 								<!--/-enable shorturl-->
 								<?php
-								if(is_plugin_active('woocommerce/woocommerce.php')){ ?>
-									<tr valign="top">
-										<th scrope="row"></th>
-										<td>
-											<input type="checkbox" name="Websms_general[auto_sync]" id="Websms_general[auto_sync]" class="Websms_box sync_group" <?php echo (($auto_sync=='on')?"checked='checked'":''); ?> onchange="toggleDisabled(this)"/> <?php _e( 'Sync To Group', WebsmsConstants::TEXT_DOMAIN ) ?>
-											<?php 
-												$groups = json_decode(WebsmscURLOTP::group_list(),true);
-											?>
-											<select name="Websms_general[group_auto_sync]" id="group_auto_sync">
-
-												<?php 
-												if(!is_array($groups['description']) || array_key_exists('desc', $groups['description'])){ ?>
-														<option value="0">SELECT</option>
-													<?php
-												}
-												else{
-													foreach($groups['description'] as $group){ ?>
-														<option value="<?php echo $group['Group']['name']; ?>" <?php echo (trim($group_auto_sync) == $group['Group']['name']) ? 'selected="selected"' : ''; ?>><?php echo $group['Group']['name']; ?></option>
-													<?php						
-													}
-												}
-												?>
-
-											</select>
-											<?php
-												if((!is_array($groups['description']) || array_key_exists('desc', $groups['description'])) && $islogged==true){
-													?>
-														<a href="javascript:void(0)" onclick="create_group(this);" id="create_group" style="text-decoration: none;">Create Group </a>
-													<?php		
-												}
-											?>
-											<span class="tooltip" data-title="Sync users to a Group in Newsletters.lk"><span class="dashicons dashicons-info"></span></span>						  
-										</td>
-									</tr>
-									<?php
-										}
-									?>
-								<?php
-								if($hasWoocommerce){?>
+								if($hasWoocommerce){ ?>
 								<?php
 								/* 
 								<tr valign="top">
@@ -904,7 +835,7 @@ class Websms_Setting_Options {
 									echo '
 										<h1 class="text-center">Opps, You need install woocomerce plugin to use this functions</h1>
 										<div class="text-center">
-											<img src="https://newsletters.lk/knowledge_base/assets/images/woocommerce.jpg" width="200">
+											<img src="'.esc_url(plugin_dir_url( __FILE__ ) . '../images/woocommerce.jpg"').' width="200">
 										</div>
 										
 										';
@@ -984,7 +915,7 @@ class Websms_Setting_Options {
 									<a href="https://api.whatsapp.com/send?phone=94759002002" target="_blank" class="btn btn-outline btn-news">CONTACT WHATSAPP</a>
 									
 								</div>
-								<img src="https://newsletters.lk/assets/images/support.png" width="100">
+								<img src="<?php echo esc_url(plugin_dir_url( __FILE__ ) . '../images/support.png'); ?>" width="100">
 							</div>
 						</div>
 
@@ -993,7 +924,7 @@ class Websms_Setting_Options {
 							<div class="cont">
 								<div class="flex">
 									<div class="col">
-										<img src="https://newsletters.lk/assets/images/substantial.png" style="width:200px;"/>
+										<img src="<?php echo esc_url(plugin_dir_url( __FILE__ ) . '../images/substantial.png'); ?>" style="width:200px;"/>
 									</div>
 									<div class="col" style="padding-left:10px;">
 										<h4>Current Version : <?php $data = get_plugin_data( WP_PLUGIN_DIR."/newsletters.lk/newsletters.lk.php", false, false );echo $data['Version'].' (Official build)'; ?></h4>

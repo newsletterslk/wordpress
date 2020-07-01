@@ -1,4 +1,5 @@
 <?php
+wp_head();
 if(!headers_sent())
 		header('Content-Type: text/html; charset=utf-8');
 		echo '<html>
@@ -6,42 +7,60 @@ if(!headers_sent())
 					<meta http-equiv="X-UA-Compatible" content="IE=edge">
 					<meta name="viewport" content="width=device-width, initial-scale=1">
 					<link rel="stylesheet" type="text/css" href="' . $css_url . '" />
+					<style>
+					.my_panda{
+						max-width:500px;
+						margin:0px auto;
+						height:350px;
+						border:1px solid #ddd;
+						padding:15px;
+						margin-top:60px;
+					}
+					@media(max-width:580px){
+						.my_panda{
+							margin-top:0px;
+						}
+					}
+					</style>
 				</head>
 				<body>
-					<div class="mo-modal-backdrop">
-						<div class="mo_customer_validation-modal" tabindex="-1" role="dialog" id="mo_site_otp_form">
-							<div class="mo_customer_validation-modal-backdrop"></div>
-							<div class="mo_customer_validation-modal-dialog mo_customer_validation-modal-md">
-								<div class="login mo_customer_validation-modal-content">
-									<div class="mo_customer_validation-modal-header">
-										<b>'.__("Validate OTP (One Time Passcode)").'</b>
-										<a class="close" href="#" onclick="mo_validation_goback();" style="box-shadow: none;">&larr; '.__( 'Go Back' ).'</a>
+					<div class="my_panda">
+						
+						<div class="mo-modal-backdrop">
+							<div class="mo_customer_validation-modal" tabindex="-1" role="dialog" id="mo_site_otp_form">
+								<div class="mo_customer_validation-modal-backdrop"></div>
+								<div class="mo_customer_validation-modal-dialog mo_customer_validation-modal-md">
+									<div class="login mo_customer_validation-modal-content">
+										<div class="mo_customer_validation-modal-header">
+											<b>'.__("Validate OTP (One Time Passcode)").'</b>
+											<a class="close" href="#" onclick="mo_validation_goback();" style="box-shadow: none;">&larr; '.__( 'Go Back' ).'</a>
+										</div>
+										<div class="mo_customer_validation-modal-body center">
+											<div>'.$message.'</div><br /> ';
+											if(!WebsmsUtility::isBlank($user_email) || !WebsmsUtility::isBlank($phone_number))
+											{
+			echo'								<div class="mo_customer_validation-login-container">
+													<form name="f" method="post" action="">
+														<input type="hidden" name="option" value="Websms-validate-otp-form" />
+														<input type="number" name="Websms_customer_validation_otp_token"  autofocus="true" placeholder="" id="Websms_customer_validation_otp_token" required="true" class="mo_customer_validation-textbox" autofocus="true" pattern="[0-9]{4,8}" title="'.WebsmsMessages::showMessage('OTP_RANGE').'" />
+														<br /><input type="submit" name="Websms_otp_token_submit" id="Websms_otp_token_submit" class="miniorange_otp_token_submit"  value="'.__("Validate OTP").'" />
+														<input type="hidden" name="otp_type" value="'.$otp_type.'">';
+														if(!$from_both){
+			echo'											<input type="hidden" id="from_both" name="from_both" value="false" />
+															<a style="float:right" id="verify_otp" onclick="mo_otp_verification_resend();">'.WebsmsMessages::showMessage('RESEND_OTP').'</a>
+															<span id="timer" style="min-width:80px; float:right">00:00 sec</span>';
+														}else{
+			echo'											<input type="hidden" id="from_both" name="from_both" value="true" />
+															<a style="float:right" id="verify_otp" onclick="mo_select_goback();">'.WebsmsMessages::showMessage('RESEND_OTP').'</a>
+															<span id="timer" style="min-width:80px; float:right">00:00 sec</span>';
+														}
+														
+														extra_post_data();
+			echo'									</form>
+												</div>';
+											}
+			echo'						</div>
 									</div>
-									<div class="mo_customer_validation-modal-body center">
-										<div>'.$message.'</div><br /> ';
-										if(!WebsmsUtility::isBlank($user_email) || !WebsmsUtility::isBlank($phone_number))
-										{
-		echo'								<div class="mo_customer_validation-login-container">
-												<form name="f" method="post" action="">
-													<input type="hidden" name="option" value="Websms-validate-otp-form" />
-													<input type="number" name="Websms_customer_validation_otp_token"  autofocus="true" placeholder="" id="Websms_customer_validation_otp_token" required="true" class="mo_customer_validation-textbox" autofocus="true" pattern="[0-9]{4,8}" title="'.WebsmsMessages::showMessage('OTP_RANGE').'" />
-													<br /><input type="submit" name="Websms_otp_token_submit" id="Websms_otp_token_submit" class="miniorange_otp_token_submit"  value="'.__("Validate OTP").'" />
-													<input type="hidden" name="otp_type" value="'.$otp_type.'">';
-													if(!$from_both){
-		echo'											<input type="hidden" id="from_both" name="from_both" value="false" />
-														<a style="float:right" id="verify_otp" onclick="mo_otp_verification_resend();">'.WebsmsMessages::showMessage('RESEND_OTP').'</a>
-														<span id="timer" style="min-width:80px; float:right">00:00 sec</span>';
-													}else{
-		echo'											<input type="hidden" id="from_both" name="from_both" value="true" />
-														<a style="float:right" id="verify_otp" onclick="mo_select_goback();">'.WebsmsMessages::showMessage('RESEND_OTP').'</a>
-														<span id="timer" style="min-width:80px; float:right">00:00 sec</span>';
-													}
-													
-													extra_post_data();
-		echo'									</form>
-											</div>';
-										}
-		echo'						</div>
 								</div>
 							</div>
 						</div>
@@ -113,5 +132,7 @@ if(!headers_sent())
 						}, 1000);
 					</script>
 				</body>
-		    </html>';
+			</html>';
+			
+			wp_footer();
 ?>			

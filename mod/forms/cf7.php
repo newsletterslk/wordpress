@@ -258,7 +258,7 @@
 					//validate otp if no error
 					if(empty($result->invalid_fields)) {
 					if(!$this->processOTPEntered())
-						$result->invalidate( $tag, WebsmsUtility::_get_invalid_otp_method());
+						$result->invalidate( $tag, WebsmsUtility::newsletterlk_get_invalid_otp_method());
 					else
 						$this->unsetOTPSessionVariables();
 					}

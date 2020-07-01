@@ -136,29 +136,30 @@
 
 	function Websms_site_otp_validation_form($user_login,$user_email,$phone_number,$message,$otp_type,$from_both)
 	{
-		
-		$otp_resend_timer = websmslk_get_option( 'otp_resend_timer', 'Websms_general', '15');
-		$max_otp_resend_allowed = websmslk_get_option( 'max_otp_resend_allowed', 'Websms_general', '4');
-		$params=array(
-			'css_url'=>MOV_CSS_URL, 
-			'message'=>$message, 
-			'user_email'=>$user_email, 
-			'phone_number'=>WebsmscURLOTP::checkPhoneNos($phone_number), 
-			'otp_type'=>$otp_type, 
-			'from_both'=>$from_both, 
-			'otp_resend_timer'=>$otp_resend_timer, 
-			'max_otp_resend_allowed'=>$max_otp_resend_allowed, 
-		);
-		echo get_websmslk_template('template/register-otp-template.php',$params);
-		exit();
+	    if($_SESSION['sa_mobile_verified'] == false){ 
+	        $otp_resend_timer = websmslk_get_option( 'otp_resend_timer', 'Websms_general', '15');
+    		$max_otp_resend_allowed = websmslk_get_option( 'max_otp_resend_allowed', 'Websms_general', '4');
+    		$params=array(
+    			'css_url'=>plugin_dir_url(dirname(__FILE__)).'css/sms_alert_customer_validation_style.css', 
+    			'message'=>$message, 
+    			'user_email'=>$user_email, 
+    			'phone_number'=>WebsmscURLOTP::checkPhoneNos($phone_number), 
+    			'otp_type'=>$otp_type, 
+    			'from_both'=>$from_both, 
+    			'otp_resend_timer'=>$otp_resend_timer, 
+    			'max_otp_resend_allowed'=>$max_otp_resend_allowed, 
+    		);
+    		echo get_websmslk_template('template/register-otp-template.php',$params);
+    		exit;
+	    }
 	}
 	
 	
 	function Websms_external_phone_validation_form($goBackURL,$user_email,$message,$form,$usermeta)
 	{
-		$img = "<div style='display:table;text-align:center;'><img src='".MOV_LOADER_URL."'></div>";
+		$img = "<div style='display:table;text-align:center;'><img src='".plugin_dir_url(dirname(__FILE__))."images/ajax-loader.gif'></div>";
 		$params=array(
-			'css_url'=>MOV_CSS_URL, 
+			'css_url'=>plugin_dir_url(dirname(__FILE__)).'css/sms_alert_customer_validation_style.css', 
 			'message'=>$message, 
 			'user_email'=>$user_email,
 			'goBackURL'=>$goBackURL,  
@@ -173,7 +174,7 @@
 	function WebsmsAskForResetPassword($username,$phone_number,$message,$otp_type,$from_both)
 	{
 		$params=array(
-			'css_url'=>MOV_CSS_URL, 
+			'css_url'=>plugin_dir_url(dirname(__FILE__)).'css/sms_alert_customer_validation_style.css', 
 			'message'=>$message, 
 			'username'=>$username, 
 			'phone_number'=>WebsmscURLOTP::checkPhoneNos($phone_number), 
